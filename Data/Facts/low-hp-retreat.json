@@ -1,0 +1,43 @@
+{
+    "schemaVersion": 1,
+    "factSetId": "low-hp-retreat",
+    "description": "Player at critical HP, surrounded — should trigger retreat cascade.",
+    "updatedAtUtc": "2026-05-04T00:00:00Z",
+    "decisionId": "demo-1",
+    "actorId": "Player",
+    "targetId": "EnemyBoss",
+    "combatState": {
+        "playerHealthPercent": 12,
+        "playerManaPercent": 30,
+        "targetHealthPercent": 80,
+        "targetThreatPercent": 70,
+        "nearbyAllyCount": 0,
+        "nearbyEnemyCount": 3,
+        "strongEnemyCount": 1,
+        "lowestAllyHealthPercent": 100,
+        "skillOnCooldown": false,
+        "hasHealingPotion": false,
+        "interruptSkillReady": false,
+        "escapeSkillReady": false,
+        "targetIsBoss": true,
+        "targetIsCastingHighImpactSkill": false,
+        "isStunned": false,
+        "isSilenced": false,
+        "isRooted": false,
+        "hasLineOfSight": true,
+        "burstCooldownSeconds": 0,
+        "interruptCooldownSeconds": 0,
+        "escapeCooldownSeconds": 0
+    },
+    "profile": {
+        "actorId": "Player",
+        "role": 1,
+        "riskTolerance": 1,
+        "level": 12
+    },
+    "enemies": [
+        { "enemyId": "boss-1", "archetype": 4, "healthPercent": 80, "threatPercent": 70, "distanceMeters": 4.0, "isCasting": false, "isElite": true },
+        { "enemyId": "minion-1", "archetype": 1, "healthPercent": 100, "threatPercent": 30, "distanceMeters": 6.0, "isCasting": false, "isElite": false },
+        { "enemyId": "minion-2", "archetype": 1, "healthPercent": 100, "threatPercent": 30, "distanceMeters": 7.0, "isCasting": false, "isElite": false }
+    ]
+}

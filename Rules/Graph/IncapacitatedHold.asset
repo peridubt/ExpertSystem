@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cac3f406351a0b94b9f866928445fa70, type: 3}
+  m_Name: IncapacitatedHold
+  m_EditorClassIdentifier: 
+  ruleName: Incapacitated Hold
+  description: 
+  priority: 90
+  category: Custom
+  conditions:
+  - id: 21badcd0-6ecc-4cec-b590-a1e47e2e4a04
+    factTypeName: CombatState
+    fieldName: IsStunned
+    op: 0
+    constantValue: true
+    parentId: fc0321fe-0d07-42ea-bef5-684056afc7c5
+    position: {x: 58, y: -50}
+  - id: 01cfa9fd-2f1e-4e44-9f9d-3d056c8bfbe1
+    factTypeName: CombatState
+    fieldName: IsSilenced
+    op: 0
+    constantValue: true
+    parentId: fc0321fe-0d07-42ea-bef5-684056afc7c5
+    position: {x: 58, y: 104}
+  - id: 8666752d-4de2-479e-9bd9-6c4ce531d6a7
+    factTypeName: CombatState
+    fieldName: IsRooted
+    op: 0
+    constantValue: true
+    parentId: fc0321fe-0d07-42ea-bef5-684056afc7c5
+    position: {x: 58, y: 258}
+  logicNodes:
+  - id: fc0321fe-0d07-42ea-bef5-684056afc7c5
+    kind: 1
+    parentId: 
+    position: {x: 331, y: 104}
+  actions:
+  - id: 5bd8b057-7482-43af-b570-1f9eb1be2107
+    kind: 0
+    tacticalAction: Hold
+    utilityScore: 50
+    reason: Player incapacitated
+    decisionStatus: 
+    message: 
+    position: {x: 746, y: 104}

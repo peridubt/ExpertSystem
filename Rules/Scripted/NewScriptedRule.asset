@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f13aaca9d8faa654fb4de74579cb0167, type: 3}
+  m_Name: NewScriptedRule
+  m_EditorClassIdentifier: 
+  ruleName: MultiEnemyAlert
+  description: 
+  priority: 0
+  category: Custom
+  defineBody: "CombatState state = null!;\r\nGameDecision decision = null!;\r\n\r\nWhen()\r\n   
+    .Match(() => decision, d => d.Status == DecisionStatus.Open)\r\n    .Match(()
+    => state)\r\n    .Exists<EnemyProfile>(e => e.IsElite)\r\n    .Exists<EnemyProfile>(e
+    => e.HealthPercent > 50);\r\n\r\nThen()\r\n    .Do(ctx => ctx.Warning(decision,
+    \"Multiple healthy elite enemies present\"));"

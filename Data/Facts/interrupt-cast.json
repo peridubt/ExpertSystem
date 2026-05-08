@@ -1,0 +1,41 @@
+{
+    "schemaVersion": 1,
+    "factSetId": "interrupt-cast",
+    "description": "Enemy casting high-impact spell, interrupt ready — should trigger Interrupt.",
+    "updatedAtUtc": "2026-05-04T00:00:00Z",
+    "decisionId": "demo-3",
+    "actorId": "Player",
+    "targetId": "EnemyMage",
+    "combatState": {
+        "playerHealthPercent": 70,
+        "playerManaPercent": 65,
+        "targetHealthPercent": 60,
+        "targetThreatPercent": 60,
+        "nearbyAllyCount": 1,
+        "nearbyEnemyCount": 1,
+        "strongEnemyCount": 0,
+        "lowestAllyHealthPercent": 80,
+        "skillOnCooldown": false,
+        "hasHealingPotion": true,
+        "interruptSkillReady": true,
+        "escapeSkillReady": true,
+        "targetIsBoss": false,
+        "targetIsCastingHighImpactSkill": true,
+        "isStunned": false,
+        "isSilenced": false,
+        "isRooted": false,
+        "hasLineOfSight": true,
+        "burstCooldownSeconds": 0,
+        "interruptCooldownSeconds": 0,
+        "escapeCooldownSeconds": 0
+    },
+    "profile": {
+        "actorId": "Player",
+        "role": 1,
+        "riskTolerance": 1,
+        "level": 12
+    },
+    "enemies": [
+        { "enemyId": "mage-1", "archetype": 3, "healthPercent": 60, "threatPercent": 60, "distanceMeters": 8.0, "isCasting": true, "isElite": false }
+    ]
+}

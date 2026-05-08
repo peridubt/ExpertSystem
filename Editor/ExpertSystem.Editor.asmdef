@@ -1,0 +1,19 @@
+{
+    "name": "ExpertSystem.Editor",
+    "rootNamespace": "",
+    "references": [
+        "ExpertSystem.RuleEngine",
+        "ExpertSystem.Rules"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

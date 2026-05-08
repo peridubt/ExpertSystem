@@ -1,0 +1,20 @@
+{
+    "name": "ExpertSystem.Rules",
+    "rootNamespace": "",
+    "references": [
+        "ExpertSystem.RuleEngine"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "NRules.dll",
+        "NRules.Fluent.dll",
+        "NRules.RuleModel.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

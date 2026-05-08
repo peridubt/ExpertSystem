@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs wc *)",
+      "Bash(mkdir -p \"/tmp/nrules-testing\")",
+      "Read(//tmp/**)",
+      "Bash(curl -sSL -o nrules.testing.nupkg \"https://www.nuget.org/api/v2/package/NRules.Testing/1.0.4\" -w \"HTTP: %{http_code}\\\\nSize: %{size_download}\\\\n\")",
+      "Bash(unzip -o nrules.testing.nupkg -d extracted)",
+      "Bash(python3 -c \"import uuid; print\\(uuid.uuid4\\(\\).hex\\)\")",
+      "Bash(grep -E \"\\(Setup|Session|Verify|Rule\\\\`\\\\`|Insert\\)\")",
+      "Bash(grep -E \"\\(RulesTestFixture|IRulesTestSetup|Rule\\\\`|Session\\)\")",
+      "Bash(sort -t: -k2 -n)",
+      "Read(//c/Program Files/Unity/Hub/Editor//**)",
+      "Read(//c/Program Files/Unity/Hub/Editor/**)",
+      "Bash(where.exe Unity)",
+      "Bash(\"/d/Unity/2022.3.62f3/Editor/Unity.exe\" -batchmode -nographics -runTests -projectPath \"D:/Projects/Thesis\" -testPlatform EditMode -testResults \"D:/Projects/Thesis/test-results.xml\" -logFile \"D:/Projects/Thesis/test-run.log\" -testCategory \"\")",
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(python3 -)",
+      "Bash(python -)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(rm -f \"D:/Projects/Thesis/test-results.xml\" \"D:/Projects/Thesis/test-run.log\")",
+      "Bash(\"/d/Unity/2022.3.62f3/Editor/Unity.exe\" -batchmode -nographics -runTests -projectPath \"D:/Projects/Thesis\" -testPlatform EditMode -testResults \"D:/Projects/Thesis/test-results.xml\" -logFile \"D:/Projects/Thesis/test-run.log\")"
+    ]
+  }
+}

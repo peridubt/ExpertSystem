@@ -1,0 +1,27 @@
+{
+    "name": "ExpertSystem.RuleEngine.Tests",
+    "rootNamespace": "",
+    "references": [
+        "ExpertSystem.RuleEngine",
+        "ExpertSystem.Rules"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "NRules.dll",
+        "NRules.Fluent.dll",
+        "NRules.RuleModel.dll",
+        "NRules.Testing.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false,
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ]
+}
