@@ -1,15 +1,19 @@
+// Набор эталонных боевых сценариев для проверки корректности движка.
 using System.Collections.Generic;
 using ExpertSystem.RuleEngine.Core.Application;
 using ExpertSystem.RuleEngine.Core.Domain;
 
 namespace ExpertSystem.RuleEngine.Core.Testing
 {
+    /// <summary>Фабрика стандартных сценариев "ситуация → ожидаемое решение".</summary>
     public static class DefaultRpgScenarios
     {
+        /// <summary>Создаёт список эталонных сценариев. Возвращает перечень DecisionScenario.</summary>
         public static IReadOnlyList<DecisionScenario> Create()
         {
             return new List<DecisionScenario>
             {
+                // Критическое давление: мало HP, окружён, нет отступления → Retreat + Abort.
                 new DecisionScenario
                 {
                     Name = "Retreat under lethal pressure",
@@ -29,6 +33,7 @@ namespace ExpertSystem.RuleEngine.Core.Testing
                         HasLineOfSight = true,
                     },
                 },
+                // Опасный каст врага + готов прерыватель → Interrupt + Review.
                 new DecisionScenario
                 {
                     Name = "Interrupt dangerous cast",
@@ -48,6 +53,7 @@ namespace ExpertSystem.RuleEngine.Core.Testing
                         HasLineOfSight = true,
                     },
                 },
+                // Чистое окно на добивание цели → Burst + Execute.
                 new DecisionScenario
                 {
                     Name = "Clean execute window",

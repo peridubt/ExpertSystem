@@ -1,3 +1,5 @@
+// Узел условия в графе. Даёт выбрать тип факта, его поле, оператор сравнения и
+// значение. Имеет выходной порт для подключения к логическому узлу или корню.
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +11,7 @@ using UnityEngine.UIElements;
 
 namespace ExpertSystem.Editor.GraphView.Nodes
 {
+    /// <summary>Визуальный узел одного условия (паттерна над фактом).</summary>
     public class ConditionNodeView : Node
     {
         public ConditionData Data { get; }
@@ -19,6 +22,7 @@ namespace ExpertSystem.Editor.GraphView.Nodes
         private EnumField _operatorField;
         private TextField _valueField;
 
+        /// <summary>Строит узел из данных условия. Принимает модель ConditionData.</summary>
         public ConditionNodeView(ConditionData data)
         {
             Data = data ?? throw new ArgumentNullException(nameof(data));
@@ -28,6 +32,7 @@ namespace ExpertSystem.Editor.GraphView.Nodes
             OutputPort.portName = "When";
             outputContainer.Add(OutputPort);
 
+            // Выпадающий список типов фактов.
             var factTypes = FactTypeRegistry.FactTypes.ToList();
             var initialFact = factTypes.FirstOrDefault(t => t.Name == data.factTypeName) ?? factTypes.FirstOrDefault();
             _factDropdown = new PopupField<Type>("Fact Type", factTypes, initialFact, FormatType, FormatType);
@@ -51,6 +56,7 @@ namespace ExpertSystem.Editor.GraphView.Nodes
             RefreshPorts();
         }
 
+        /// <summary>Реакция на смену типа факта: сбрасывает поле и пересобирает список полей.</summary>
         private void OnFactChanged(Type newType)
         {
             Data.factTypeName = newType?.Name ?? string.Empty;
@@ -58,6 +64,10 @@ namespace ExpertSystem.Editor.GraphView.Nodes
             RebuildMemberDropdown(newType, null);
         }
 
+        /// <summary>
+        /// Пересобирает выпадающий список полей выбранного факта. Принимает тип факта и
+        /// предпочтительное имя поля (для восстановления выбора).
+        /// </summary>
         private void RebuildMemberDropdown(Type factType, string preferredField)
         {
             if (_memberDropdown != null && _memberDropdown.parent != null)
@@ -76,15 +86,20 @@ namespace ExpertSystem.Editor.GraphView.Nodes
                 Data.fieldName = evt.newValue?.Name ?? string.Empty;
             });
 
+            // Вставляем список полей сразу под списком типов.
             int factIndex = extensionContainer.IndexOf(_factDropdown);
             extensionContainer.Insert(factIndex + 1, _memberDropdown);
 
             if (initialMember != null) Data.fieldName = initialMember.Name;
         }
 
+        /// <summary>Отображение типа в списке.</summary>
         private static string FormatType(Type t) => t == null ? "<none>" : t.Name;
+
+        /// <summary>Отображение члена в списке.</summary>
         private static string FormatMember(MemberInfo m) => m == null ? "<none>" : m.Name;
 
+        /// <summary>Запоминает позицию узла в данных при перемещении.</summary>
         public override void SetPosition(Rect newPos)
         {
             base.SetPosition(newPos);

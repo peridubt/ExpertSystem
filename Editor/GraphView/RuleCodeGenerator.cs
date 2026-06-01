@@ -1,25 +1,30 @@
+// Кодогенератор графовых правил. Обходит дерево узлов графа (условия, логические
+// операторы, действия) и формирует исходный C#-файл с классом правила NRules,
+// который Unity затем компилирует в сборку правил.
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using ExpertSystem.Rules.Graph;
 using UnityEditor;
 
 namespace ExpertSystem.Editor.GraphView
 {
+    /// <summary>Статический генератор кода правил из ресурсов RuleGraphAsset.</summary>
     public static class RuleCodeGenerator
     {
         public const string GeneratedDir = "Assets/ExpertSystem/Rules/Graph/Generated";
         public const string GeneratedNamespace = "ExpertSystem.Rules.Graph.Generated";
 
+        /// <summary>Пункт меню: собрать все графы правил в проекте.</summary>
         [MenuItem("Tools/Expert System/Build All Rule Graphs")]
         public static void BuildAllMenuItem()
         {
             BuildAll();
         }
 
+        /// <summary>Находит все ресурсы графов и генерирует для каждого код.</summary>
         public static void BuildAll()
         {
             var guids = AssetDatabase.FindAssets("t:" + nameof(RuleGraphAsset));
@@ -33,15 +38,19 @@ namespace ExpertSystem.Editor.GraphView
                 count++;
             }
             AssetDatabase.Refresh();
-            UnityEngine.Debug.Log($"[ExpertSystem] Built {count} rule graph(s).");
+            UnityEngine.Debug.Log($"[ExpertSystem] Собрано графов правил: {count}.");
         }
 
+        /// <summary>
+        /// Генерирует .cs-файл для одного графа. Принимает ресурс графа. Пропускает граф
+        /// без действий (правило без Then бессмысленно).
+        /// </summary>
         public static void Build(RuleGraphAsset asset)
         {
             if (asset == null) return;
             if (asset.actions == null || asset.actions.Count == 0)
             {
-                UnityEngine.Debug.LogWarning($"[ExpertSystem] Skipping '{asset.ruleName}': no actions defined.");
+                UnityEngine.Debug.LogWarning($"[ExpertSystem] Пропуск '{asset.ruleName}': не заданы действия.");
                 return;
             }
 
@@ -54,12 +63,15 @@ namespace ExpertSystem.Editor.GraphView
             AssetDatabase.ImportAsset(path);
         }
 
+        /// <summary>
+        /// Собирает текст класса правила. Принимает граф и имя класса, возвращает исходный код.
+        /// </summary>
         private static string Generate(RuleGraphAsset asset, string className)
         {
             var factTypes = CollectFactTypes(asset);
 
             var sb = new StringBuilder();
-            sb.AppendLine("// Auto-generated from RuleGraphAsset. Do not edit by hand.");
+            sb.AppendLine("// Автоматически сгенерировано из RuleGraphAsset. Не редактировать вручную.");
             sb.AppendLine("using ExpertSystem.RuleEngine.Core.Domain;");
             sb.AppendLine("using ExpertSystem.RuleEngine.Core.Rules;");
             sb.AppendLine("using NRules.Fluent.Dsl;");
@@ -76,6 +88,7 @@ namespace ExpertSystem.Editor.GraphView
             sb.AppendLine("        public override void Define()");
             sb.AppendLine("        {");
 
+            // Объявления переменных-фактов.
             foreach (var t in factTypes)
             {
                 sb.AppendLine($"            {t.Name} {VarName(t.Name)} = null!;");
@@ -92,6 +105,7 @@ namespace ExpertSystem.Editor.GraphView
             return sb.ToString();
         }
 
+        /// <summary>Выводит цепочку вызовов (When/Then) с отступами и ; в конце последней строки.</summary>
         private static void EmitChain(StringBuilder sb, string head, List<string> lines)
         {
             sb.AppendLine($"            {head}");
@@ -106,6 +120,10 @@ namespace ExpertSystem.Editor.GraphView
             }
         }
 
+        /// <summary>
+        /// Собирает список типов фактов, используемых в графе. Принимает граф, возвращает
+        /// типы без повторов. Тип GameDecision добавляется всегда (он нужен действиям).
+        /// </summary>
         private static List<Type> CollectFactTypes(RuleGraphAsset asset)
         {
             var types = new List<Type>();
@@ -129,6 +147,12 @@ namespace ExpertSystem.Editor.GraphView
             return types;
         }
 
+        /// <summary>
+        /// Строит строки блока When. Принимает граф и типы фактов, возвращает список вызовов.
+        /// Условия верхнего уровня (parentId пуст) объединяются в Match по каждому типу;
+        /// логические группы верхнего уровня разворачиваются рекурсивно; для фактов без
+        /// условий добавляется пустой Match (факт должен присутствовать в памяти).
+        /// </summary>
         private static List<string> BuildWhenLines(RuleGraphAsset asset, List<Type> factTypes)
         {
             var conditions = (asset.conditions ?? new List<ConditionData>())
@@ -136,6 +160,7 @@ namespace ExpertSystem.Editor.GraphView
                 .ToList();
             var logicNodes = asset.logicNodes ?? new List<LogicNodeData>();
 
+            // Группировка по родителю: пустой ключ = верхний уровень (неявное И).
             var conditionsByParent = conditions
                 .GroupBy(c => c.parentId ?? string.Empty)
                 .ToDictionary(g => g.Key, g => g.ToList());
@@ -147,6 +172,7 @@ namespace ExpertSystem.Editor.GraphView
             var lines = new List<string>();
             var topMatched = new HashSet<string>();
 
+            // Условия верхнего уровня: по одному Match на тип факта, предикаты через &&.
             if (conditionsByParent.TryGetValue(string.Empty, out var topConds))
             {
                 var byFact = topConds.GroupBy(c => c.factTypeName).ToDictionary(g => g.Key, g => g.ToList());
@@ -161,6 +187,7 @@ namespace ExpertSystem.Editor.GraphView
                 }
             }
 
+            // Логические группы верхнего уровня (And/Or/Not).
             if (logicByParent.TryGetValue(string.Empty, out var topLogic))
             {
                 foreach (var l in topLogic)
@@ -170,6 +197,8 @@ namespace ExpertSystem.Editor.GraphView
                 }
             }
 
+            // Факты, которые не участвуют ни в условиях верхнего уровня, ни в группах —
+            // добавляем пустым Match, чтобы они просто требовались в рабочей памяти.
             var factsInGroups = CollectFactsInGroups(conditions, logicNodes);
             foreach (var t in factTypes)
             {
@@ -181,6 +210,7 @@ namespace ExpertSystem.Editor.GraphView
             return lines;
         }
 
+        /// <summary>Возвращает имена типов фактов, использованных внутри логических групп.</summary>
         private static HashSet<string> CollectFactsInGroups(List<ConditionData> conditions, List<LogicNodeData> logicNodes)
         {
             var logicIds = new HashSet<string>(logicNodes.Select(l => l.id));
@@ -195,6 +225,11 @@ namespace ExpertSystem.Editor.GraphView
             return result;
         }
 
+        /// <summary>
+        /// Рекурсивно разворачивает логический узел в код NRules. Принимает узел, карты
+        /// потомков по родителю, типы фактов и глубину. Возвращает текст группы.
+        /// NRules 1.0 использует синтаксис одного builder'а: .Or(b => b.Match(..).Match(..)).
+        /// </summary>
         private static string EmitLogicGroup(
             LogicNodeData node,
             Dictionary<string, List<ConditionData>> conditionsByParent,
@@ -209,8 +244,8 @@ namespace ExpertSystem.Editor.GraphView
             {
                 case LogicKind.Not:
                 {
-                    // NRules Not<T>(predicates...) does not accept an alias.
-                    // For MVP we only support NOT wrapping a single condition.
+                    // NRules Not<T>(предикаты) не принимает alias; поддерживаем только
+                    // обёртку ровно над одним условием.
                     if (childConditions.Count == 1 && childLogic.Count == 0)
                     {
                         var c = childConditions[0];
@@ -221,23 +256,19 @@ namespace ExpertSystem.Editor.GraphView
                         return $"Not<{t.Name}>({p} => {pred})";
                     }
                     UnityEngine.Debug.LogWarning(
-                        "[ExpertSystem] NOT logic node must wrap exactly one condition; skipping.");
+                        "[ExpertSystem] Узел NOT должен оборачивать ровно одно условие; пропуск.");
                     return null;
                 }
                 case LogicKind.And:
                 case LogicKind.Or:
                 {
-                    // NRules 1.0+ uses single-builder syntax:
-                    //   .Or(b => b.Match(...).Match(...))   -- branches chained inside builder
-                    //   .And(b => b.Match(...).Match(...))  -- patterns chained inside builder
                     var op = node.kind == LogicKind.And ? "And" : "Or";
-                    var b = "b" + depth;
+                    var b = "b" + depth; // уникальное имя параметра по глубине
                     var calls = new List<string>();
 
                     if (node.kind == LogicKind.And)
                     {
-                        // Inside AND group, conditions on the same fact merge into one Match
-                        // so the var binds once with conjunction predicate.
+                        // Внутри И условия на один факт сливаются в один Match (предикаты через &&).
                         var byFact = childConditions
                             .GroupBy(c => c.factTypeName)
                             .ToDictionary(g => g.Key, g => g.ToList());
@@ -252,7 +283,7 @@ namespace ExpertSystem.Editor.GraphView
                     }
                     else
                     {
-                        // Inside OR group, every condition is its own branch (separate Match call).
+                        // Внутри ИЛИ каждое условие — отдельная ветвь (отдельный Match).
                         foreach (var c in childConditions)
                         {
                             var t = factTypes.FirstOrDefault(x => x.Name == c.factTypeName);
@@ -263,6 +294,7 @@ namespace ExpertSystem.Editor.GraphView
                         }
                     }
 
+                    // Вложенные логические группы.
                     foreach (var sub in childLogic)
                     {
                         var subEmit = EmitLogicGroup(sub, conditionsByParent, logicByParent, factTypes, depth + 1);
@@ -279,6 +311,7 @@ namespace ExpertSystem.Editor.GraphView
             return null;
         }
 
+        /// <summary>Строит строки блока Then из действий. Принимает действия, возвращает список вызовов .Do.</summary>
         private static List<string> BuildThenLines(List<ActionData> actions)
         {
             var lines = new List<string>();
@@ -309,6 +342,10 @@ namespace ExpertSystem.Editor.GraphView
             return lines;
         }
 
+        /// <summary>
+        /// Форматирует константу под тип поля факта. Принимает тип факта, имя поля и сырое
+        /// значение. Возвращает литерал C# (строка в кавычках, bool, enum, float с суффиксом f).
+        /// </summary>
         private static string FormatValue(Type factType, string fieldName, string raw)
         {
             var member = FactTypeRegistry.GetMembers(factType).FirstOrDefault(m => m.Name == fieldName);
@@ -326,6 +363,10 @@ namespace ExpertSystem.Editor.GraphView
             return string.IsNullOrEmpty(raw) ? "0" : raw;
         }
 
+        /// <summary>
+        /// Превращает имя правила в корректное имя класса C#. Принимает строку, возвращает
+        /// PascalCase-идентификатор с суффиксом Rule.
+        /// </summary>
         private static string MakeClassName(string raw)
         {
             if (string.IsNullOrWhiteSpace(raw)) return "UnnamedRule";
@@ -346,13 +387,14 @@ namespace ExpertSystem.Editor.GraphView
             }
 
             if (sb.Length == 0) return "UnnamedRule";
-            if (char.IsDigit(sb[0])) sb.Insert(0, "_");
+            if (char.IsDigit(sb[0])) sb.Insert(0, "_"); // имя не может начинаться с цифры
 
             var name = sb.ToString();
             if (!name.EndsWith("Rule", StringComparison.Ordinal)) name += "Rule";
             return name;
         }
 
+        /// <summary>Имя переменной для типа факта. Для GameDecision — всегда "decision".</summary>
         private static string VarName(string typeName)
         {
             if (string.IsNullOrEmpty(typeName)) return "fact";
@@ -360,6 +402,7 @@ namespace ExpertSystem.Editor.GraphView
             return char.ToLowerInvariant(typeName[0]) + typeName.Substring(1);
         }
 
+        /// <summary>Переводит оператор сравнения в символ C#.</summary>
         private static string OpToCode(ComparisonOperator op) => op switch
         {
             ComparisonOperator.Equal => "==",
@@ -371,12 +414,14 @@ namespace ExpertSystem.Editor.GraphView
             _ => "=="
         };
 
+        /// <summary>Экранирует спецсимволы для вставки строки в исходный код.</summary>
         private static string Escape(string s)
         {
             if (s == null) return string.Empty;
             return s.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\n", "\\n").Replace("\r", "\\r");
         }
 
+        /// <summary>Создаёт папку для сгенерированных файлов, если её ещё нет.</summary>
         private static void EnsureGeneratedDir()
         {
             if (!Directory.Exists(GeneratedDir))

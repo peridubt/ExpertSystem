@@ -1,3 +1,5 @@
+// Узел действия в графе. Тип действия выбирается из списка, под него динамически
+// перестраиваются поля параметров. Имеет входной порт для подключения к корню.
 using System;
 using ExpertSystem.Rules.Graph;
 using ExpertSystem.RuleEngine.Core.Domain;
@@ -7,6 +9,7 @@ using UnityEngine.UIElements;
 
 namespace ExpertSystem.Editor.GraphView.Nodes
 {
+    /// <summary>Визуальный узел одного действия (блок Then).</summary>
     public class ActionNodeView : Node
     {
         public ActionData Data { get; }
@@ -14,6 +17,7 @@ namespace ExpertSystem.Editor.GraphView.Nodes
 
         private readonly VisualElement _paramsContainer;
 
+        /// <summary>Строит узел из данных действия. Принимает модель ActionData.</summary>
         public ActionNodeView(ActionData data)
         {
             Data = data ?? throw new ArgumentNullException(nameof(data));
@@ -40,6 +44,7 @@ namespace ExpertSystem.Editor.GraphView.Nodes
             RefreshPorts();
         }
 
+        /// <summary>Перестраивает поля параметров под выбранный тип действия.</summary>
         private void RebuildParams()
         {
             _paramsContainer.Clear();
@@ -47,6 +52,7 @@ namespace ExpertSystem.Editor.GraphView.Nodes
             switch (Data.kind)
             {
                 case ActionKind.Suggest:
+                    // Предложение действия: тактическое действие, полезность, обоснование.
                     var actionEnum = TryParseEnum<TacticalAction>(Data.tacticalAction);
                     Data.tacticalAction = actionEnum.ToString();
 
@@ -64,6 +70,7 @@ namespace ExpertSystem.Editor.GraphView.Nodes
                     break;
 
                 case ActionKind.SetStatus:
+                    // Установка статуса решения.
                     var statusEnum = TryParseEnum<DecisionStatus>(Data.decisionStatus);
                     Data.decisionStatus = statusEnum.ToString();
 
@@ -75,22 +82,25 @@ namespace ExpertSystem.Editor.GraphView.Nodes
                 case ActionKind.Info:
                 case ActionKind.Warning:
                 case ActionKind.Error:
+                    // Оповещение: одно текстовое поле сообщения.
                     var msgField = new TextField("Message") { value = Data.message ?? string.Empty };
                     msgField.RegisterValueChangedCallback(e => Data.message = e.newValue);
                     _paramsContainer.Add(msgField);
                     break;
 
                 case ActionKind.Update:
-                    _paramsContainer.Add(new Label("Updates the decision fact in working memory."));
+                    _paramsContainer.Add(new Label("Обновляет факт решения в рабочей памяти."));
                     break;
             }
         }
 
+        /// <summary>Безопасный разбор строки в значение перечисления. Возвращает значение или default.</summary>
         private static T TryParseEnum<T>(string s) where T : struct, Enum
         {
             return Enum.TryParse<T>(s, out var v) ? v : default;
         }
 
+        /// <summary>Запоминает позицию узла в данных при перемещении.</summary>
         public override void SetPosition(Rect newPos)
         {
             base.SetPosition(newPos);

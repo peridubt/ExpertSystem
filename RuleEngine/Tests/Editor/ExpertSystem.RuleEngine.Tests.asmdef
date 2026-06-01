@@ -3,7 +3,8 @@
     "rootNamespace": "",
     "references": [
         "ExpertSystem.RuleEngine",
-        "ExpertSystem.Rules"
+        "ExpertSystem.Rules",
+        "ExpertSystem.Integration"
     ],
     "includePlatforms": [
         "Editor"

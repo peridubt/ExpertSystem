@@ -7,9 +7,9 @@ using NUnit.Framework;
 namespace ExpertSystem.RuleEngine.Tests.Editor
 {
     /// <summary>
-    /// Tests that verify conflict resolution: when multiple rules match the same
-    /// facts, the highest-utility action wins, and incapacitating / emergency
-    /// rules correctly dominate weaker suggestions.
+    /// Тесты разрешения конфликтов: когда на одних фактах срабатывают несколько правил,
+    /// побеждает действие с наибольшей полезностью, а правила обездвиживания/экстренные
+    /// корректно перекрывают более слабые предложения.
     /// </summary>
     [TestFixture]
     public class ConflictResolutionTests

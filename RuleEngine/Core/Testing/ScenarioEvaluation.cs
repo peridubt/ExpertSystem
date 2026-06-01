@@ -1,7 +1,9 @@
+// Результат прогона одного сценария: фактический вывод и признак совпадения с ожиданием.
 using ExpertSystem.RuleEngine.Core.Application;
 
 namespace ExpertSystem.RuleEngine.Core.Testing
 {
+    /// <summary>Итог проверки сценария.</summary>
     public class ScenarioEvaluation
     {
         public DecisionScenario Scenario { get; set; } = new DecisionScenario();

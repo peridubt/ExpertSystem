@@ -1,5 +1,7 @@
+// Перечисления предметной области: роль персонажа, склонность к риску, архетип врага.
 namespace ExpertSystem.RuleEngine.Core.Domain
 {
+    /// <summary>Боевая роль персонажа (задаёт, какие ролевые правила применимы).</summary>
     public enum CharacterRole
     {
         Unspecified = 0,
@@ -9,6 +11,7 @@ namespace ExpertSystem.RuleEngine.Core.Domain
         Support = 4,
     }
 
+    /// <summary>Склонность персонажа к риску.</summary>
     public enum RiskTolerance
     {
         Balanced = 0,
@@ -16,6 +19,7 @@ namespace ExpertSystem.RuleEngine.Core.Domain
         Aggressive = 2,
     }
 
+    /// <summary>Архетип противника.</summary>
     public enum EnemyArchetype
     {
         Unknown = 0,

@@ -1,5 +1,7 @@
+// Факт-описание одного противника боевой ситуации.
 namespace ExpertSystem.RuleEngine.Core.Domain
 {
+    /// <summary>Характеристики отдельного врага.</summary>
     public class EnemyProfile
     {
         public string EnemyId { get; set; } = string.Empty;

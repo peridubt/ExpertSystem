@@ -1,3 +1,5 @@
+// Окно редактора скриптовых правил. Поля метаданных и многострочный редактор тела
+// метода Define(); кнопки сохранения и сборки. Открывается двойным кликом по ресурсу.
 using ExpertSystem.Rules.Scripted;
 using UnityEditor;
 using UnityEditor.Callbacks;
@@ -6,6 +8,7 @@ using UnityEngine.UIElements;
 
 namespace ExpertSystem.Editor.Scripting
 {
+    /// <summary>Окно текстового конструктора правил.</summary>
     public class ScriptedRuleWindow : EditorWindow
     {
         [SerializeField] private ScriptedRuleAsset _asset;
@@ -15,6 +18,7 @@ namespace ExpertSystem.Editor.Scripting
         private TextField _categoryField;
         private TextField _bodyField;
 
+        /// <summary>Открывает окно для заданного ресурса. Принимает ресурс скриптового правила.</summary>
         public static void Open(ScriptedRuleAsset asset)
         {
             var window = GetWindow<ScriptedRuleWindow>();
@@ -23,6 +27,8 @@ namespace ExpertSystem.Editor.Scripting
             window.Show();
         }
 
+        /// <summary>Обработчик двойного клика по ассету. Открывает окно, если это скриптовое
+        /// правило. Возвращает true, если клик обработан.</summary>
         [OnOpenAsset]
         public static bool OnOpen(int instanceID, int line)
         {
@@ -35,6 +41,7 @@ namespace ExpertSystem.Editor.Scripting
             return false;
         }
 
+        /// <summary>Строит интерфейс: тулбар, подсказку и многострочный редактор тела.</summary>
         private void CreateGUI()
         {
             var toolbar = new VisualElement();
@@ -71,6 +78,7 @@ namespace ExpertSystem.Editor.Scripting
                 EditorUtility.SetDirty(_asset);
             });
 
+            // Save — сохранить ресурс; Build — сохранить и сгенерировать код.
             var saveButton = new Button(Save) { text = "Save" };
             var buildButton = new Button(() =>
             {
@@ -85,7 +93,7 @@ namespace ExpertSystem.Editor.Scripting
             toolbar.Add(buildButton);
             rootVisualElement.Add(toolbar);
 
-            var hint = new Label("Body of Define() — declare fact vars, then When()/Then() chains.");
+            var hint = new Label("Тело Define() — объявите переменные-факты, затем цепочки When()/Then().");
             hint.style.paddingLeft = 6;
             hint.style.paddingRight = 6;
             hint.style.unityFontStyleAndWeight = FontStyle.Italic;
@@ -97,6 +105,7 @@ namespace ExpertSystem.Editor.Scripting
             _bodyField.style.marginLeft = 6;
             _bodyField.style.marginRight = 6;
             _bodyField.style.marginBottom = 6;
+            // Моноширинный шрифт для удобства редактирования кода.
             var inner = _bodyField.Q(className: "unity-text-element");
             if (inner != null)
             {
@@ -114,12 +123,14 @@ namespace ExpertSystem.Editor.Scripting
             if (_asset != null) ApplyAsset(_asset);
         }
 
+        /// <summary>Запоминает ресурс и, если окно построено, отображает его.</summary>
         private void LoadAsset(ScriptedRuleAsset asset)
         {
             _asset = asset;
             if (_bodyField != null) ApplyAsset(asset);
         }
 
+        /// <summary>Заполняет поля окна значениями из ресурса.</summary>
         private void ApplyAsset(ScriptedRuleAsset asset)
         {
             _nameField.SetValueWithoutNotify(asset.ruleName);
@@ -128,6 +139,7 @@ namespace ExpertSystem.Editor.Scripting
             _bodyField.SetValueWithoutNotify(asset.defineBody ?? string.Empty);
         }
 
+        /// <summary>Помечает ресурс изменённым и сохраняет ассеты на диск.</summary>
         private void Save()
         {
             if (_asset == null) return;

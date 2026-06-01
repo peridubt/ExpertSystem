@@ -6,8 +6,8 @@ using NUnit.Framework;
 namespace ExpertSystem.RuleEngine.Tests.Editor
 {
     /// <summary>
-    /// Boundary-value tests: each rule threshold is hit exactly at the edge
-    /// and one step beyond, to catch off-by-one errors in rule predicates.
+    /// Тесты граничных значений: каждый порог правила проверяется ровно на границе
+    /// и на шаг за ней — для отлова ошибок off-by-one в предикатах правил.
     /// </summary>
     [TestFixture]
     public class SelfHealBoundaryTests : IsolatedRulesTestFixture

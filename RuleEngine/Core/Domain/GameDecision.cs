@@ -1,15 +1,19 @@
+// Факт решения — накапливает результат вывода: действие, статус, обоснование,
+// оповещения и список сработавших правил. Здесь же — перечисления статусов и действий.
 using System.Collections.Generic;
 
 namespace ExpertSystem.RuleEngine.Core.Domain
 {
+    /// <summary>Статус решения по итогам вывода.</summary>
     public enum DecisionStatus
     {
-        Open = 0,
-        Execute = 1,
-        Review = 2,
-        Abort = 3,
+        Open = 0,    // решение ещё формируется
+        Execute = 1, // выполнять как предложено
+        Review = 2,  // есть предупреждения, требуется проверка
+        Abort = 3,   // критическая ситуация, не выполнять
     }
 
+    /// <summary>Тактическое действие, которое может предложить система.</summary>
     public enum TacticalAction
     {
         Hold = 0,
@@ -23,6 +27,7 @@ namespace ExpertSystem.RuleEngine.Core.Domain
         HealAlly = 8,
     }
 
+    /// <summary>Формируемое решение. Списки доступны только на чтение — меняются методами класса.</summary>
     public class GameDecision
     {
         public string DecisionId { get; set; } = string.Empty;
@@ -35,6 +40,7 @@ namespace ExpertSystem.RuleEngine.Core.Domain
         public List<GameAlert> Alerts { get; } = new List<GameAlert>();
         public List<string> TriggeredRules { get; } = new List<string>();
 
+        /// <summary>Регистрирует имя сработавшего правила без дублей. Принимает имя правила.</summary>
         public void AddTriggeredRule(string ruleName)
         {
             if (string.IsNullOrEmpty(ruleName)) return;

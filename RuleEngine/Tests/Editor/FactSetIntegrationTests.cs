@@ -9,13 +9,13 @@ using NUnit.Framework;
 namespace ExpertSystem.RuleEngine.Tests.Editor
 {
     /// <summary>
-    /// End-to-end integration tests covering the full cycle:
-    ///   JSON file in Data/Facts/  →  FactSetData
-    ///                              →  CombatSnapshot (via FactSetMapper)
-    ///                              →  GameRulesEngine (NRules session)
+    /// Сквозные интеграционные тесты полного цикла:
+    ///   JSON-файл в Data/Facts/   →  FactSetData
+    ///                              →  CombatSnapshot (через FactSetMapper)
+    ///                              →  GameRulesEngine (сессия NRules)
     ///                              →  DecisionResult
-    ///                              →  DecisionResultData (round-trip back to JSON)
-    /// Validates that the storage layer, mapping layer, and rule-engine cooperate correctly.
+    ///                              →  DecisionResultData (обратная запись в JSON)
+    /// Проверяют, что слой хранения, слой маппинга и движок работают как единое целое.
     /// </summary>
     [TestFixture]
     public class FactSetIntegrationTests

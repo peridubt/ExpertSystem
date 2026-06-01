@@ -1,3 +1,5 @@
+// Окно ручной отладки правил. Позволяет задать значения фактов вручную, прогнать
+// движок и увидеть, какие правила сработали и каков результат решения.
 using System;
 using System.Text;
 using ExpertSystem.RuleEngine.Core.Domain;
@@ -9,8 +11,10 @@ using UnityEngine.UIElements;
 
 namespace ExpertSystem.Editor.Testing
 {
+    /// <summary>Окно интерактивной проверки правил на произвольном состоянии.</summary>
     public class RuleTesterWindow : EditorWindow
     {
+        /// <summary>Пункт меню: открыть окно тестера.</summary>
         [MenuItem("Tools/Expert System/Rule Tester")]
         public static void ShowWindow()
         {
@@ -24,6 +28,7 @@ namespace ExpertSystem.Editor.Testing
         private DecisionStatus _initialStatus = DecisionStatus.Open;
         private Label _outputLabel;
 
+        /// <summary>Создаёт состояние боя по умолчанию (полное здоровье, цель цела).</summary>
         private static CombatState NewDefaultState()
         {
             return new CombatState
@@ -35,6 +40,7 @@ namespace ExpertSystem.Editor.Testing
             };
         }
 
+        /// <summary>Строит интерфейс: поля ввода фактов, кнопки и панель вывода.</summary>
         private void CreateGUI()
         {
             var root = rootVisualElement;
@@ -50,7 +56,7 @@ namespace ExpertSystem.Editor.Testing
             };
             root.Add(header);
 
-            var hint = new Label("Set fact values, click Evaluate, see which rules fired.")
+            var hint = new Label("Задайте значения фактов, нажмите Evaluate, посмотрите сработавшие правила.")
             {
                 style = { marginLeft = 8, marginBottom = 6, unityFontStyleAndWeight = FontStyle.Italic },
             };
@@ -59,7 +65,7 @@ namespace ExpertSystem.Editor.Testing
             var scroll = new ScrollView { style = { flexGrow = 1 } };
             root.Add(scroll);
 
-            scroll.Add(SectionHeader("Combat State (numeric)"));
+            scroll.Add(SectionHeader("Combat State (числовые)"));
             scroll.Add(IntField("Player HP %", _state.PlayerHealthPercent, v => _state.PlayerHealthPercent = v));
             scroll.Add(IntField("Player Mana %", _state.PlayerManaPercent, v => _state.PlayerManaPercent = v));
             scroll.Add(IntField("Target HP %", _state.TargetHealthPercent, v => _state.TargetHealthPercent = v));
@@ -69,7 +75,7 @@ namespace ExpertSystem.Editor.Testing
             scroll.Add(IntField("Nearby Enemies", _state.NearbyEnemyCount, v => _state.NearbyEnemyCount = v));
             scroll.Add(IntField("Strong Enemies", _state.StrongEnemyCount, v => _state.StrongEnemyCount = v));
 
-            scroll.Add(SectionHeader("Combat State (flags)"));
+            scroll.Add(SectionHeader("Combat State (флаги)"));
             scroll.Add(BoolField("Has Healing Potion", _state.HasHealingPotion, v => _state.HasHealingPotion = v));
             scroll.Add(BoolField("Interrupt Skill Ready", _state.InterruptSkillReady, v => _state.InterruptSkillReady = v));
             scroll.Add(BoolField("Escape Skill Ready", _state.EscapeSkillReady, v => _state.EscapeSkillReady = v));
@@ -103,10 +109,11 @@ namespace ExpertSystem.Editor.Testing
                     backgroundColor = new Color(0f, 0f, 0f, 0.25f),
                 },
             };
-            _outputLabel.text = "(no evaluation yet)";
+            _outputLabel.text = "(вывода ещё не было)";
             root.Add(_outputLabel);
         }
 
+        /// <summary>Создаёт жирный заголовок секции. Принимает текст, возвращает Label.</summary>
         private static Label SectionHeader(string text)
         {
             return new Label(text)
@@ -119,6 +126,7 @@ namespace ExpertSystem.Editor.Testing
             };
         }
 
+        /// <summary>Создаёт целочисленное поле. Принимает подпись, начальное значение и сеттер.</summary>
         private static IntegerField IntField(string label, int initial, Action<int> setter)
         {
             var f = new IntegerField(label) { value = initial };
@@ -128,6 +136,7 @@ namespace ExpertSystem.Editor.Testing
             return f;
         }
 
+        /// <summary>Создаёт переключатель. Принимает подпись, начальное значение и сеттер.</summary>
         private static Toggle BoolField(string label, bool initial, Action<bool> setter)
         {
             var f = new Toggle(label) { value = initial };
@@ -137,13 +146,15 @@ namespace ExpertSystem.Editor.Testing
             return f;
         }
 
+        /// <summary>Сбрасывает состояние к значениям по умолчанию.</summary>
         private void Reset()
         {
             _state = NewDefaultState();
             _initialStatus = DecisionStatus.Open;
-            _outputLabel.text = "(state reset — re-open the window to refresh fields)";
+            _outputLabel.text = "(состояние сброшено — переоткройте окно для обновления полей)";
         }
 
+        /// <summary>Прогоняет движок на текущем состоянии и выводит результат в панель.</summary>
         private void Evaluate()
         {
             try
@@ -165,10 +176,10 @@ namespace ExpertSystem.Editor.Testing
                 sb.AppendLine($"Reason           : {(string.IsNullOrEmpty(result.TacticalReason) ? "—" : result.TacticalReason)}");
                 sb.AppendLine();
 
-                sb.AppendLine($"Triggered rules ({result.TriggeredRules.Count}):");
+                sb.AppendLine($"Сработавшие правила ({result.TriggeredRules.Count}):");
                 if (result.TriggeredRules.Count == 0)
                 {
-                    sb.AppendLine("  (none — no rule conditions matched)");
+                    sb.AppendLine("  (нет — ни одно условие не выполнилось)");
                 }
                 else
                 {
@@ -178,7 +189,7 @@ namespace ExpertSystem.Editor.Testing
                 if (result.Alerts.Count > 0)
                 {
                     sb.AppendLine();
-                    sb.AppendLine($"Alerts ({result.Alerts.Count}):");
+                    sb.AppendLine($"Оповещения ({result.Alerts.Count}):");
                     foreach (var a in result.Alerts)
                     {
                         sb.AppendLine($"  [sev={a.Severity}] {a.RuleName}: {a.Message}");
@@ -189,7 +200,7 @@ namespace ExpertSystem.Editor.Testing
             }
             catch (Exception ex)
             {
-                _outputLabel.text = "ERROR: " + ex.Message + "\n\nSee Console for stack trace.";
+                _outputLabel.text = "ОШИБКА: " + ex.Message + "\n\nСм. стек в консоли.";
                 Debug.LogException(ex);
             }
         }

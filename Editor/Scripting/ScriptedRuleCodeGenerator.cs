@@ -1,3 +1,5 @@
+// Кодогенератор скриптовых правил. Оборачивает введённое пользователем тело метода
+// Define() в шаблон класса правила NRules и сохраняет .cs-файл в сборку правил.
 using System;
 using System.IO;
 using System.Text;
@@ -6,17 +8,20 @@ using UnityEditor;
 
 namespace ExpertSystem.Editor.Scripting
 {
+    /// <summary>Статический генератор кода из ресурсов ScriptedRuleAsset.</summary>
     public static class ScriptedRuleCodeGenerator
     {
         public const string GeneratedDir = "Assets/ExpertSystem/Rules/Scripted/Generated";
         public const string GeneratedNamespace = "ExpertSystem.Rules.Scripted.Generated";
 
+        /// <summary>Пункт меню: собрать все скриптовые правила в проекте.</summary>
         [MenuItem("Tools/Expert System/Build All Scripted Rules")]
         public static void BuildAllMenuItem()
         {
             BuildAll();
         }
 
+        /// <summary>Находит все ресурсы скриптовых правил и генерирует для каждого код.</summary>
         public static void BuildAll()
         {
             var guids = AssetDatabase.FindAssets("t:" + nameof(ScriptedRuleAsset));
@@ -30,15 +35,16 @@ namespace ExpertSystem.Editor.Scripting
                 count++;
             }
             AssetDatabase.Refresh();
-            UnityEngine.Debug.Log($"[ExpertSystem] Built {count} scripted rule(s).");
+            UnityEngine.Debug.Log($"[ExpertSystem] Собрано скриптовых правил: {count}.");
         }
 
+        /// <summary>Генерирует .cs-файл для одного ресурса. Принимает ресурс; пропускает пустое тело.</summary>
         public static void Build(ScriptedRuleAsset asset)
         {
             if (asset == null) return;
             if (string.IsNullOrWhiteSpace(asset.defineBody))
             {
-                UnityEngine.Debug.LogWarning($"[ExpertSystem] Skipping '{asset.ruleName}': empty body.");
+                UnityEngine.Debug.LogWarning($"[ExpertSystem] Пропуск '{asset.ruleName}': пустое тело.");
                 return;
             }
 
@@ -51,10 +57,14 @@ namespace ExpertSystem.Editor.Scripting
             AssetDatabase.ImportAsset(path);
         }
 
+        /// <summary>
+        /// Оборачивает тело Define() в класс правила. Принимает ресурс и имя класса,
+        /// возвращает исходный код. Тело пользователя вставляется построчно с отступом.
+        /// </summary>
         private static string Generate(ScriptedRuleAsset asset, string className)
         {
             var sb = new StringBuilder();
-            sb.AppendLine("// Auto-generated from ScriptedRuleAsset. Do not edit by hand.");
+            sb.AppendLine("// Автоматически сгенерировано из ScriptedRuleAsset. Не редактировать вручную.");
             sb.AppendLine("using ExpertSystem.RuleEngine.Core.Domain;");
             sb.AppendLine("using ExpertSystem.RuleEngine.Core.Rules;");
             sb.AppendLine("using NRules.Fluent.Dsl;");
@@ -80,6 +90,10 @@ namespace ExpertSystem.Editor.Scripting
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Превращает имя правила в корректное имя класса C#. Принимает строку, возвращает
+        /// PascalCase-идентификатор с суффиксом Rule.
+        /// </summary>
         private static string MakeClassName(string raw)
         {
             if (string.IsNullOrWhiteSpace(raw)) return "UnnamedRule";
@@ -107,12 +121,14 @@ namespace ExpertSystem.Editor.Scripting
             return name;
         }
 
+        /// <summary>Экранирует спецсимволы для вставки строки в исходный код.</summary>
         private static string Escape(string s)
         {
             if (s == null) return string.Empty;
             return s.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\n", "\\n").Replace("\r", "\\r");
         }
 
+        /// <summary>Создаёт папку для сгенерированных файлов, если её ещё нет.</summary>
         private static void EnsureGeneratedDir()
         {
             if (!Directory.Exists(GeneratedDir))

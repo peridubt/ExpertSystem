@@ -1,3 +1,6 @@
+// Окно редактора графовых правил. Тулбар с метаданными правила (имя, приоритет,
+// категория), полотно графа и кнопки сохранения/сборки. Открывается двойным кликом
+// по ресурсу графа.
 using ExpertSystem.Rules.Graph;
 using UnityEditor;
 using UnityEditor.Callbacks;
@@ -6,6 +9,7 @@ using UnityEngine.UIElements;
 
 namespace ExpertSystem.Editor.GraphView
 {
+    /// <summary>Окно визуального конструктора правил.</summary>
     public class RuleGraphWindow : EditorWindow
     {
         [SerializeField] private RuleGraphAsset _asset;
@@ -15,6 +19,7 @@ namespace ExpertSystem.Editor.GraphView
         private IntegerField _priorityField;
         private TextField _categoryField;
 
+        /// <summary>Открывает окно для заданного ресурса графа. Принимает ресурс графа.</summary>
         public static void Open(RuleGraphAsset asset)
         {
             var window = GetWindow<RuleGraphWindow>();
@@ -23,6 +28,8 @@ namespace ExpertSystem.Editor.GraphView
             window.Show();
         }
 
+        /// <summary>Обработчик двойного клика по ассету. Принимает id и строку; открывает
+        /// окно, если ассет — граф правил. Возвращает true, если клик обработан.</summary>
         [OnOpenAsset]
         public static bool OnOpen(int instanceID, int line)
         {
@@ -35,6 +42,7 @@ namespace ExpertSystem.Editor.GraphView
             return false;
         }
 
+        /// <summary>Строит интерфейс окна: тулбар, поля метаданных, полотно графа.</summary>
         private void CreateGUI()
         {
             var toolbar = new VisualElement();
@@ -71,6 +79,7 @@ namespace ExpertSystem.Editor.GraphView
                 EditorUtility.SetDirty(_asset);
             });
 
+            // Save — сохранить граф в ресурс; Build — сохранить и сгенерировать код.
             var saveButton = new Button(() => _graphView.Save()) { text = "Save" };
 
             var buildButton = new Button(() =>
@@ -93,12 +102,14 @@ namespace ExpertSystem.Editor.GraphView
             if (_asset != null) ApplyAsset(_asset);
         }
 
+        /// <summary>Запоминает ресурс и, если окно уже построено, отображает его.</summary>
         private void LoadAsset(RuleGraphAsset asset)
         {
             _asset = asset;
             if (_graphView != null) ApplyAsset(asset);
         }
 
+        /// <summary>Заполняет поля метаданных и загружает граф в полотно.</summary>
         private void ApplyAsset(RuleGraphAsset asset)
         {
             _nameField.SetValueWithoutNotify(asset.ruleName);

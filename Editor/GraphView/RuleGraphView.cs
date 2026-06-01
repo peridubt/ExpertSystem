@@ -1,3 +1,6 @@
+// Полотно визуального редактора правил (на базе Unity GraphView). Отрисовывает узлы
+// условий, действий и логических операторов, хранит связи между ними и сериализует
+// граф в ресурс RuleGraphAsset (и обратно). Дерево задаётся полем parentId у узлов.
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,11 +13,13 @@ using UnityEngine.UIElements;
 
 namespace ExpertSystem.Editor.GraphView
 {
+    /// <summary>Граф-вид редактора правил.</summary>
     public class RuleGraphView : UnityEditor.Experimental.GraphView.GraphView
     {
         private RuleGraphAsset _asset;
         private RuleRootNodeView _root;
 
+        /// <summary>Настраивает зум, манипуляторы перетаскивания/выделения и фон-сетку.</summary>
         public RuleGraphView()
         {
             style.flexGrow = 1;
@@ -29,6 +34,8 @@ namespace ExpertSystem.Editor.GraphView
             grid.StretchToParentSize();
         }
 
+        /// <summary>Возвращает порты, совместимые с начальным для соединения (разное
+        /// направление, разные узлы, совпадающий тип).</summary>
         public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter)
         {
             return ports.ToList().Where(p =>
@@ -39,6 +46,7 @@ namespace ExpertSystem.Editor.GraphView
             ).ToList();
         }
 
+        /// <summary>Наполняет контекстное меню пунктами добавления узлов.</summary>
         public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
         {
             var mousePos = contentViewContainer.WorldToLocal(evt.mousePosition);
@@ -54,6 +62,10 @@ namespace ExpertSystem.Editor.GraphView
             base.BuildContextualMenu(evt);
         }
 
+        /// <summary>
+        /// Загружает граф из ресурса: создаёт узлы, затем восстанавливает связи по parentId.
+        /// Принимает ресурс графа.
+        /// </summary>
         public void Load(RuleGraphAsset asset)
         {
             _asset = asset;
@@ -64,6 +76,7 @@ namespace ExpertSystem.Editor.GraphView
 
             if (asset == null) return;
 
+            // Сначала создаём все узлы и запоминаем их по id.
             var conditionViews = new Dictionary<string, ConditionNodeView>();
             var logicViews = new Dictionary<string, LogicNodeView>();
 
@@ -85,6 +98,7 @@ namespace ExpertSystem.Editor.GraphView
                 AddActionView(a, connect: true);
             }
 
+            // Затем протягиваем рёбра от узлов к их родителям (логический узел или корень).
             if (asset.logicNodes != null)
             {
                 foreach (var l in asset.logicNodes)
@@ -103,6 +117,10 @@ namespace ExpertSystem.Editor.GraphView
             }
         }
 
+        /// <summary>
+        /// Сохраняет граф в ресурс: по рёбрам вычисляет parentId каждого узла и
+        /// переносит данные узлов в списки ресурса.
+        /// </summary>
         public void Save()
         {
             if (_asset == null) return;
@@ -111,6 +129,7 @@ namespace ExpertSystem.Editor.GraphView
             _asset.logicNodes.Clear();
             _asset.actions.Clear();
 
+            // Проходим рёбра: источник → его родитель (корень даёт пустой parentId).
             var parentMap = new Dictionary<string, string>();
             foreach (var edge in edges.ToList())
             {
@@ -125,6 +144,7 @@ namespace ExpertSystem.Editor.GraphView
                 parentMap[sourceId] = parentId;
             }
 
+            // Записываем узлы с вычисленным parentId.
             foreach (var node in nodes.ToList())
             {
                 switch (node)
@@ -147,6 +167,7 @@ namespace ExpertSystem.Editor.GraphView
             AssetDatabase.SaveAssets();
         }
 
+        /// <summary>Создаёт узел условия в точке и подключает к корню.</summary>
         private void AddCondition(Vector2 pos)
         {
             var data = new ConditionData
@@ -158,6 +179,7 @@ namespace ExpertSystem.Editor.GraphView
             AddConditionView(data, connect: true);
         }
 
+        /// <summary>Создаёт узел действия в точке и подключает к корню.</summary>
         private void AddAction(Vector2 pos)
         {
             var data = new ActionData
@@ -169,6 +191,7 @@ namespace ExpertSystem.Editor.GraphView
             AddActionView(data, connect: true);
         }
 
+        /// <summary>Создаёт логический узел заданного вида и подключает к корню.</summary>
         private void AddLogic(Vector2 pos, LogicKind kind)
         {
             var data = new LogicNodeData
@@ -185,6 +208,7 @@ namespace ExpertSystem.Editor.GraphView
             }
         }
 
+        /// <summary>Добавляет вид узла условия; при connect=true соединяет с корнем.</summary>
         private ConditionNodeView AddConditionView(ConditionData data, bool connect)
         {
             var view = new ConditionNodeView(data);
@@ -198,6 +222,7 @@ namespace ExpertSystem.Editor.GraphView
             return view;
         }
 
+        /// <summary>Добавляет вид логического узла.</summary>
         private LogicNodeView AddLogicView(LogicNodeData data)
         {
             var view = new LogicNodeView(data);
@@ -205,6 +230,7 @@ namespace ExpertSystem.Editor.GraphView
             return view;
         }
 
+        /// <summary>Добавляет вид узла действия; при connect=true соединяет с корнем.</summary>
         private ActionNodeView AddActionView(ActionData data, bool connect)
         {
             var view = new ActionNodeView(data);
@@ -218,6 +244,7 @@ namespace ExpertSystem.Editor.GraphView
             return view;
         }
 
+        /// <summary>Возвращает входной порт родителя по parentId: логический узел или корень.</summary>
         private Port ResolveInputPort(string parentId, Dictionary<string, LogicNodeView> logicViews)
         {
             if (string.IsNullOrEmpty(parentId)) return _root?.ConditionsInput;
@@ -225,6 +252,7 @@ namespace ExpertSystem.Editor.GraphView
             return _root?.ConditionsInput;
         }
 
+        /// <summary>Возвращает id узла по его типу или null.</summary>
         private static string GetNodeId(Node n)
         {
             switch (n)
