@@ -1,0 +1,39 @@
+{
+    "schemaVersion": 1,
+    "factSetId": "out-of-combat",
+    "description": "Player resting out of combat at reduced HP — triggers the regeneration effect rule that mutates state.",
+    "updatedAtUtc": "2026-05-19T00:00:00Z",
+    "decisionId": "demo-regen",
+    "actorId": "Player",
+    "targetId": "",
+    "combatState": {
+        "playerHealthPercent": 50,
+        "playerManaPercent": 100,
+        "targetHealthPercent": 100,
+        "targetThreatPercent": 0,
+        "nearbyAllyCount": 0,
+        "nearbyEnemyCount": 0,
+        "strongEnemyCount": 0,
+        "lowestAllyHealthPercent": 100,
+        "skillOnCooldown": false,
+        "hasHealingPotion": false,
+        "interruptSkillReady": false,
+        "escapeSkillReady": true,
+        "targetIsBoss": false,
+        "targetIsCastingHighImpactSkill": false,
+        "isStunned": false,
+        "isSilenced": false,
+        "isRooted": false,
+        "hasLineOfSight": true,
+        "burstCooldownSeconds": 0,
+        "interruptCooldownSeconds": 0,
+        "escapeCooldownSeconds": 0
+    },
+    "profile": {
+        "actorId": "Player",
+        "role": 0,
+        "riskTolerance": 0,
+        "level": 10
+    },
+    "enemies": []
+}
